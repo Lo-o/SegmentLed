@@ -105,62 +105,79 @@ void setup()
 }
 
 
-void SetupAnimationSet()
+void SetupAnimationSet(uint8_t FunctionType)
 {
+    const int BlockSet1[] = {0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 32, 33, 34, 35, 36, 37, 38, 39, 48, 49, 50, 51, 52, 53, 54, 55};
+    const int BlockSet2[] = {8, 9, 10, 11, 12, 13, 14, 15, 24, 25, 26, 27, 28, 29, 30, 31, 40, 41, 42, 43, 44, 45, 46, 47};
+    
     const uint8_t peak = 255; // Max brightness value for a pixel
 
-    // each animation starts with the color that was present
-    RgbColor startingColor1 = RgbColor(peak, 0, 0);  // 1st set of blocks
-    RgbColor startingColor2 = RgbColor(0, peak, 0);  // 2nd set of blocks
-    
-    // and ends with a random color
-    RgbColor targetColor1 = RgbColor(0, peak, 0);
-    RgbColor targetColor2 = RgbColor(peak, 0, 0);
-    
-    // with the random ease function
-    AnimEaseFunction easing;
-    easing = NeoEase::QuadraticInOut;
-
-//        // each animation starts with the color that was present
-//        RgbColor originalColor = strip.GetPixelColor(pixel);
-//        // and ends with a random color
-//        RgbColor targetColor = RgbColor(random(peak), random(peak), random(peak));
-//        // with the random ease function
-//        AnimEaseFunction easing;
-
-    int BlockSet1[] = {0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 32, 33, 34, 35, 36, 37, 38, 39, 48, 49, 50, 51, 52, 53, 54, 55};
-    int BlockSet2[] = {8, 9, 10, 11, 12, 13, 14, 15, 24, 25, 26, 27, 28, 29, 30, 31, 40, 41, 42, 43, 44, 45, 46, 47};
-
-    // Block 1 animation setup 
-    for (uint16_t i = 0; i < (sizeof(BlockSet1)/sizeof(int)); i++)
-    { 
-        uint16_t pixel = BlockSet1[i];
+    if (FunctionType == 1)
+    {
+        // StartingColor by block
+        RgbColor startingColor1 = HslColor(random(170, 230) / 360.0f, 0.1f, 0.5f);  // 1st set of blocks
+        RgbColor startingColor2 = HslColor(random(170, 230) / 360.0f, 1.0f, 0.5f);  // 2nd set of blocks
         
-        uint16_t time = random(700, 8000);  // Random duration of animation. Value in centiseconds. 100 = 1sec.
+        // and ends with a random color
+        RgbColor targetColor1 = HslColor(random(170, 190) / 360.0f, 1.0f, 0.5f);
+        RgbColor targetColor2 = HslColor(random(170, 230) / 360.0f, 1.0f, 0.5f);
+        
+        // with the random ease function
+        AnimEaseFunction easing;
+        easing = NeoEase::QuadraticInOut;
 
-        animationState[pixel].StartingColor = startingColor1;  
-        animationState[pixel].EndingColor = targetColor1;
-        animationState[pixel].Easeing = easing;  // From startingColor to EndingColor using this specific curve
-
-        // now use the animation state we just calculated and start the animation
-        // which will continue to run and call the update function until it completes
-        animations.StartAnimation(pixel, time, AnimUpdate);
+        // Block 1 animation setup 
+        for (uint16_t i = 0; i < (sizeof(BlockSet1)/sizeof(int)); i++)
+        { 
+            uint16_t pixel = BlockSet1[i];
+            RgbColor originalColor = strip.GetPixelColor(pixel);
+            
+            uint16_t time = random(700, 800);  // Random duration of animation. Value in centiseconds. 100 = 1sec.
+    
+            animationState[pixel].StartingColor = originalColor;  
+            animationState[pixel].EndingColor = targetColor1;
+            animationState[pixel].Easeing = easing;  // From startingColor to EndingColor using this specific curve
+    
+            // now use the animation state we just calculated and start the animation
+            // which will continue to run and call the update function until it completes
+            animations.StartAnimation(pixel, time, AnimUpdate);
+        }
+    
+        // Block 2 animation setup
+        for (uint16_t i = 0; i < (sizeof(BlockSet2)/sizeof(int)); i++)
+        { 
+            uint16_t pixel = BlockSet2[i];
+            RgbColor originalColor = strip.GetPixelColor(pixel);
+            
+            uint16_t time = random(700, 800);  // Random duration of animation. Value in centiseconds. 100 = 1sec.
+    
+            animationState[pixel].StartingColor = originalColor;  
+            animationState[pixel].EndingColor = targetColor2;
+            animationState[pixel].Easeing = easing;  // From startingColor to EndingColor using this specific curve
+    
+            // now use the animation state we just calculated and start the animation
+            // which will continue to run and call the update function until it completes
+            animations.StartAnimation(pixel, time, AnimUpdate);
+        }
     }
 
-    // Block 2 animation setup
-    for (uint16_t i = 0; i < (sizeof(BlockSet2)/sizeof(int)); i++)
-    { 
-        uint16_t pixel = BlockSet2[i];
-        
-        uint16_t time = random(700, 8000);  // Random duration of animation. Value in centiseconds. 100 = 1sec.
+    if (FunctionType == 2)
+    {
+      for (uint16_t pixel = 0; pixel < PixelCount; pixel++)
+      {
+        RgbColor originalColor = strip.GetPixelColor(pixel);
+        RgbColor targetColor = HslColor(random(100, 300) / 360.0f, 1.0f, 0.5f);
 
-        animationState[pixel].StartingColor = startingColor2;  
-        animationState[pixel].EndingColor = targetColor2;
-        animationState[pixel].Easeing = easing;  // From startingColor to EndingColor using this specific curve
+        AnimEaseFunction easing;
+        easing = NeoEase::QuadraticInOut;
 
-        // now use the animation state we just calculated and start the animation
-        // which will continue to run and call the update function until it completes
+        uint16_t time = random(700, 800);
+        animationState[pixel].StartingColor = originalColor;
+        animationState[pixel].EndingColor = targetColor;
+        animationState[pixel].Easeing = easing;
+
         animations.StartAnimation(pixel, time, AnimUpdate);
+      }
     }
 
     
@@ -178,8 +195,10 @@ void loop()
     {
         Serial.println();
         Serial.println("Setup Next Set...");
-        // example function that sets up some animations
-        SetupAnimationSet();
+
+        uint16_t set = random(1, 3); // Randomly choose either one of the 3 functions
+        SetupAnimationSet(set);   
+        Serial.println(set);
     }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
